@@ -1,0 +1,151 @@
+1. Create the Database
+The first step is to create a database called ecommerce and set it as the active database for use.
+
+CREATE DATABASE ecommerce;
+USE ecommerce;
+
+***********
+
+Create three tables - customers, orders and products
+
+1.1 Create Customers Table
+Next, we create the customers table to store information about customers, including their unique ID, name, email, and address.
+
+-- Create customers table
+
+CREATE TABLE customers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    address VARCHAR(255)
+);
+
+--Explanation:
+
+-- Creates the "customers" table to store customer details, such as their ID, name, email, and address.
+
+CREATE TABLE customers (  
+-- Begins the creation of a new table named "customers".
+
+id INT AUTO_INCREMENT PRIMARY KEY,  
+-- Defines the "id" column as an integer, which automatically increments with each new record. This serves as the primary key, ensuring each customer has a unique identifier.
+    
+name VARCHAR(100) NOT NULL,  
+-- Defines the "name" column as a variable character string with a maximum length of 100 characters. The "NOT NULL" constraint ensures that every customer record must have a name.
+    
+email VARCHAR(100) UNIQUE NOT NULL,  
+-- Defines the "email" column as a variable character string with a maximum length of 100 characters. The "UNIQUE" constraint ensures that no two customers can have the same email, and the "NOT NULL" constraint ensures that the email is required for each customer.
+    
+address VARCHAR(255) );  
+-- Defines the "address" column as a variable character string with a maximum length of 255 characters. This column does not have a "NOT NULL" constraint, meaning it can be left empty if no address is provided.
+
+******************************************************
+ 
+1.2 Create Orders Table
+Now, we create the orders table to store information about orders. This table references the customers table via the customer_id column, which is a foreign key.
+
+-- Create orders table
+
+CREATE TABLE orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT,
+    order_date DATE,
+    total_amount DECIMAL(10, 2),
+    FOREIGN KEY (customer_id) REFERENCES customers(id)
+);
+
+--Explanation:
+
+-- Creates the "orders" table to store order details such as the order ID, customer ID, order date, and total amount.
+
+CREATE TABLE orders (  
+-- Begins the creation of a new table named "orders".
+
+id INT AUTO_INCREMENT PRIMARY KEY,  
+-- Defines the "id" column as an integer that automatically increments with each new order. This serves as the primary key, ensuring each order has a unique identifier.
+    
+customer_id INT,  
+-- Defines the "customer_id" column as an integer. This column stores the ID of the customer who placed the order, which links the order to a specific customer in the "customers" table.
+    
+order_date DATE,  
+-- Defines the "order_date" column to store the date when the order was placed. The data type is DATE, which stores the date in the format YYYY-MM-DD.
+    
+total_amount DECIMAL(10, 2),  
+-- Defines the "total_amount" column to store the total value of the order. The data type is DECIMAL(10, 2), which allows for storing numbers with up to 10 digits, 2 of which are after the decimal point (e.g., 99999999.99).
+    
+FOREIGN KEY (customer_id) REFERENCES customers(id));  
+-- Defines a foreign key constraint on the "customer_id" column, which references the "id" column in the "customers" table. This establishes a relationship between the orders and the customers who placed them, ensuring that the customer ID in the "orders" table must match a valid ID from the "customers" table.
+
+**************************************************************************
+
+
+1.3 Create Products Table
+Next, we create the products table to store information about the products, including their name, price, and description.
+
+
+-- Create products table
+CREATE TABLE products (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    description TEXT
+);
+
+--Explanation:
+
+-- Creates the "products" table to store product details such as product ID, name, price, and description.
+
+CREATE TABLE products (  
+-- Begins the creation of a new table named "products".
+
+id INT AUTO_INCREMENT PRIMARY KEY,  
+-- Defines the "id" column as an integer that automatically increments with each new product. This serves as the primary key, ensuring each product has a unique identifier.
+    
+name VARCHAR(100) NOT NULL,  
+-- Defines the "name" column to store the name of the product as a variable character string (VARCHAR). The maximum length is 100 characters, and the "NOT NULL" constraint ensures that this field cannot be left empty.
+    
+price DECIMAL(10, 2) NOT NULL,  
+-- Defines the "price" column to store the price of the product as a decimal number. The DECIMAL(10, 2) data type allows for a total of 10 digits, with 2 digits after the decimal point (e.g., 99999999.99). The "NOT NULL" constraint ensures that this field cannot be left empty.
+    
+description TEXT);
+-- Defines the "description" column to store a detailed description of the product as a text string. The TEXT data type allows for variable-length text, so the product description can be longer than VARCHAR fields.
+
+
+************************
+
+2. Insert Sample Data
+
+2.1 Insert Data into the Customers Table
+We insert some sample data into the customers table to represent three customers.
+
+-- Insert sample data into customers table
+
+INSERT INTO customers (name, email, address)
+VALUES
+    ('Arun', 'alice@example.com', '123 Main St'),
+    ('Priya', 'bob@example.com', '456 Oak Ave'),
+    ('Shyam', 'carol@example.com', '789 Pine Ln');
+
+2.2 Insert Data into the Products Table
+We insert some sample data into the products table, which includes three different products.
+
+-- Insert sample data into products table
+INSERT INTO products (name, price, description)
+
+VALUES
+    ('Product A', 25.00, 'Description for Product A'),
+    ('Product B', 35.00, 'Description for Product B'),
+    ('Product C', 55.00, 'Description for Product C');
+
+2.3 Insert Data into the Orders Table
+Next, we insert sample order data into the orders table. These orders are linked to the customers via customer_id.
+
+-- Insert sample data into orders table
+
+INSERT INTO orders (customer_id, order_date, total_amount)
+VALUES
+    (1, CURDATE(), 100.00),
+    (2, CURDATE() - INTERVAL 20 DAY, 150.00),
+    (3, CURDATE() - INTERVAL 40 DAY, 200.00);
+
+********************************

@@ -1,0 +1,305 @@
+MySQL Queries:
+
+1. Retrieve All Customers Who Have Placed an Order in the Last 30 Days
+
+--This query retrieves the names and emails of customers who have placed an order in the last 30 days.
+
+
+SELECT DISTINCT cust.name, cust.email 
+FROM customers cust 
+JOIN orders ord ON cust.id = ord.customer_id
+WHERE ord.order_date >= CURDATE() - INTERVAL 30 DAY;
+
+--Explanation:
+
+-- Retrieves distinct customer names and emails who have placed an order in the last 30 days.
+
+SELECT DISTINCT 
+    cust.name,  -- Selects the "name" of the customer from the "customers" table.
+    cust.email  -- Selects the "email" of the customer from the "customers" table.
+
+-- Specifies the table from which to retrieve the customer information.
+FROM customers cust  -- The data is retrieved from the "customers" table, which contains customer details.
+
+-- Specifies the table to join with for the order details.
+JOIN orders ord ON cust.id = ord.customer_id  -- Joins the "orders" table with the "customers" table using the "customer_id" field.
+
+-- Filters the records based on the order date.
+WHERE ord.order_date >= CURDATE() - INTERVAL 30 DAY;  -- Filters orders placed in the last 30 days. 
+-- CURDATE() returns the current date, and the INTERVAL 30 DAY subtracts 30 days from it. 
+-- Only orders made within the last 30 days are considered.
+
+********************************************
+
+2. Get the Total Amount of All Orders Placed by Each Customer
+
+--This query calculates the total amount spent by each customer by summing the total_amount for each customer.
+
+SELECT cust.name, SUM(ord.total_amount) AS total_spent
+FROM customers cust
+JOIN orders ord ON cust.id = ord.customer_id
+GROUP BY cust.id;
+
+--Explanation:
+
+
+-- Selects the customer's name from the customers table (aliased as "cust").
+SELECT cust.name, 
+
+-- Calculates the total amount spent by each customer by summing up all the order amounts.
+-- The result is given an alias "total_spent" for clarity in the output.
+SUM(ord.total_amount) AS total_spent
+
+-- Specifies that the main table to pull data from is the "customers" table.
+-- "cust" is an alias used to refer to this table in the query.
+FROM customers cust 
+
+-- Joins the "orders" table (aliased as "ord") to the "customers" table.
+-- This ensures that we only retrieve orders associated with each customer.
+JOIN orders ord 
+
+-- Sets the condition for the JOIN by linking each order to the customer who placed it.
+-- The JOIN condition is that the customer's "id" should match the "customer_id" in the orders table.
+ON cust.id = ord.customer_id 
+
+-- Groups the results by the unique customer "id".
+-- This ensures that each row in the result represents a unique customer with the sum of their orders.
+GROUP BY cust.id;
+
+**************************************************************
+
+3. Update the Price of Product C
+
+--This query updates the price of 'Product C' to 45.00.
+
+UPDATE products
+SET price = 45.00
+WHERE name = 'Product C';
+
+--Explanation:
+
+-- Specifies that we want to update the values in the "products" table.
+UPDATE products
+
+-- Sets the "price" column to a new value (45.00) for the rows that meet the conditions in the WHERE clause.
+SET price = 45.00
+
+-- Specifies which rows should be updated.
+-- Only updates rows where the "name" column has the value 'Product C'.
+-- This ensures that only the price of "Product C" is updated, without affecting other products.
+WHERE name = 'Product C';
+
+
+-- To view the result
+
+Select * FROM products;
+
+*************************************************************
+
+4. Add a New Column discount to the Products Table
+
+--This query adds a new column discount to the products table, which will store discount values.
+
+ALTER TABLE products
+ADD COLUMN discount DECIMAL(5, 2) DEFAULT 0.00;
+
+--Explanation:
+
+-- Modifies the "products" table to add a new column named "discount".
+ALTER TABLE products
+
+-- Adds a new column called "discount" to the table.
+-- The "DECIMAL(5, 2)" data type allows up to 5 total digits, with 2 digits after the decimal point (e.g., 12.34).
+ADD COLUMN discount DECIMAL(5, 2)
+
+-- Sets the default value for the "discount" column to 0.00 for new records.
+-- This means if a discount is not specified when a new product is added, it will default to 0.00.
+DEFAULT 0.00;
+
+******************************************************
+
+5. Retrieve the Top 3 Products with the Highest Price
+
+--This query retrieves the top 3 products with the highest price.
+
+SELECT name, price
+FROM products
+ORDER BY price DESC
+LIMIT 3;
+
+--Explanation:
+
+-- Selects the "name" and "price" columns from the "products" table.
+SELECT name, price
+FROM products
+
+-- Orders the results in descending order by the "price" column.
+ORDER BY price DESC
+
+-- Limits the result to the top 3 rows, so only the three most expensive products are shown.
+LIMIT 3;
+
+**********************************************
+
+
+6. Get the Names of Customers Who Have Ordered Product A
+ 
+--This query retrieves the names of customers who have ordered 'Product A'. To achieve this, we create a new table order_items to link orders and products.
+
+-- Create order_items table
+
+CREATE TABLE order_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT,
+    product_id INT,
+    quantity INT,
+    FOREIGN KEY (order_id) REFERENCES orders(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
+--Explanation:
+
+-- Create the "order_items" table to link orders with products. Each record in "order_items" represents
+-- an item in an order, detailing which product was ordered and in what quantity.
+CREATE TABLE order_items (
+    -- "id" is the primary key for the "order_items" table, set to auto-increment for uniqueness.
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    
+    -- "order_id" references the ID of the order in the "orders" table.
+    order_id INT,
+    
+    -- "product_id" references the ID of the product in the "products" table.
+    product_id INT,
+    
+    -- "quantity" stores the number of units of a product in a particular order.
+    quantity INT,
+
+    -- Sets "order_id" as a foreign key, linking to the "id" column in the "orders" table.
+    FOREIGN KEY (order_id) REFERENCES orders(id),
+    
+    -- Sets "product_id" as a foreign key, linking to the "id" column in the "products" table.
+    FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
+
+
+-- Insert sample data into order_items table
+
+INSERT INTO order_items (order_id, product_id, quantity)
+VALUES
+    (1, 1, 2),  -- Order 1 contains Product A
+    (2, 2, 1),  -- Order 2 contains Product B
+    (2, 1, 1),  -- Order 2 also contains Product A
+    (3, 3, 1);  -- Order 3 contains Product C
+
+-- Query to find customers who ordered Product A
+
+SELECT DISTINCT cust.name
+FROM customers cust
+JOIN orders ord ON cust.id = ord.customer_id
+JOIN order_items ord_itm ON ord.id = ord_itm.order_id
+JOIN products pd ON ord_itm.product_id = pd.id
+
+
+--Explanation:
+
+SELECT DISTINCT cust.name
+FROM customers cust
+-- Join "orders" table to link each customer with their orders.
+JOIN orders ord ON cust.id = ord.customer_id
+
+-- Join "order_items" table to link orders with their ordered items.
+JOIN order_items ord_itm ON ord.id = ord_itm.order_id
+
+-- Join "products" table to access product details for each order item.
+JOIN products pd ON ord_itm.product_id = pd.id
+
+-- Filter to retrieve only customers who ordered "Product A".
+WHERE pd.name = 'Product A';
+
+**************************************************************
+
+7. Join Orders and Customers to Retrieve the Customer's Name and Order Date
+
+--This query retrieves the customer's name and order date for each order.
+
+SELECT cust.name, ord.order_date
+FROM customers cust
+JOIN orders ord ON cust.id = ord.customer_id;
+
+--Explanation:
+
+-- Retrieves the "name" of each customer from the "customers" table and the corresponding "order_date" from the "orders" table.
+SELECT cust.name, ord.order_date;
+
+-- Indicates the main table, "customers", which is aliased as "cust" for simplified reference in the query.
+FROM customers cust;
+
+-- Uses an INNER JOIN to link the "orders" table with "customers" based on a matching "customer_id".
+-- For each record in "customers" that matches an "orders" record, the customer's name and the order date are displayed.
+JOIN orders ord ON cust.id = ord.customer_id;
+
+****************************************************
+
+8. Retrieve Orders with a Total Amount Greater Than 150.00
+
+--This query retrieves all orders where the total amount is greater than 150.00.
+
+SELECT * FROM orders
+WHERE total_amount > 150.00;
+
+--Explanation:
+
+-- Selects all columns from the "orders" table where the total amount is greater than 150.00.
+SELECT * 
+
+-- Specifies that the data is being selected from the "orders" table.
+FROM orders
+
+-- Filters the records to include only those where the "total_amount" is greater than 150.00.
+WHERE total_amount > 150.00;
+
+*********************************************************
+
+9. Normalize the Database by Creating a Separate Table for Order Items
+
+--The order_items table has already been created and it links orders to products. 
+
+SELECT ord.id AS order_id, cust.name AS customer_name, pd.name AS product_name, ord_itm.quantity, pd.price
+FROM orders ord
+JOIN customers cust ON ord.customer_id = cust.id
+JOIN order_items ord_itm ON ord.id = ord_itm.order_id
+JOIN products pd ON ord_itm.product_id = pd.id;
+
+--Explanation:
+
+-- Specifies the tables from which to retrieve data.
+FROM orders ord
+  
+-- Joins the "orders" table with the "customers" table on the "customer_id" to associate orders with specific customers.
+JOIN customers cust ON ord.customer_id = cust.id
+  
+-- Joins the "orders" table with the "order_items" table on the "order_id" to link each order with its respective items.
+JOIN order_items ord_itm ON ord.id = ord_itm.order_id
+  
+-- Joins the "order_items" table with the "products" table on the "product_id" to get details of the products in each order.
+JOIN products pd ON ord_itm.product_id = pd.id;
+
+***************************************************************
+
+10. Retrieve the Average Total of All Orders
+
+--This query retrieves the average total amount of all orders.
+
+SELECT AVG(total_amount) AS average_order_total
+FROM orders;
+
+--Explanation:
+
+-- Calculates the average total amount of all orders in the "orders" table.
+
+SELECT 
+    AVG(total_amount) AS average_order_total  -- Calculates the average of the "total_amount" column and renames the result as "average_order_total".
+  
+-- Specifies the table from which to retrieve the data.
+FROM orders;  -- The data is pulled from the "orders" table, where the "total_amount" values will be averaged.
